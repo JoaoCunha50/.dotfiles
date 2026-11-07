@@ -24,6 +24,10 @@ return {
 				-- automatic_enable = { exclude = { "stylua" } },
 			})
 
+			-- Not from Mason: its qmlls binary is built against a different Qt and misses
+			-- libs on NixOS.
+			vim.lsp.enable("qmlls")
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("lsp-attach-opts", { clear = true }),
 				callback = function(e)
