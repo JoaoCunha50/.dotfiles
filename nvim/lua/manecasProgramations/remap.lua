@@ -25,7 +25,7 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- kitty sessionizer
-vim.keymap.set("n", "<C-f>", "<cmd>silent !kitten @ launch --type=overlay ~/.local/bin/kitty-sessionizer<CR>")
+-- vim.keymap.set("n", "<C-f>", "<cmd>silent !kitten @ launch --type=overlay ~/.local/bin/kitty-sessionizer<CR>")
 
 -- Tornar o ficheiro executável (chmod +x)
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
@@ -34,10 +34,10 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "Q", "<nop>")
 
 vim.keymap.set("n", "<leader>ts", function()
-    vim.treesitter.stop()
-    vim.defer_fn(function()
-        vim.treesitter.start()
-    end, 100)
+	vim.treesitter.stop()
+	vim.defer_fn(function()
+		vim.treesitter.start()
+	end, 100)
 end, { desc = "Restart Treesitter" })
 
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
