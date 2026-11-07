@@ -24,8 +24,7 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 -- Substituir a palavra onde estás (Search and Replace rápido)
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
--- kitty sessionizer
--- vim.keymap.set("n", "<C-f>", "<cmd>silent !kitten @ launch --type=overlay ~/.local/bin/kitty-sessionizer<CR>")
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "tmux sessionizer" })
 
 -- Tornar o ficheiro executável (chmod +x)
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })

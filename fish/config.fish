@@ -59,6 +59,7 @@ if status is-interactive
 
     fish_add_path $HOME/.opencode/bin
     fish_add_path $HOME/.local/bin
+    fish_add_path $HOME/.local/scripts
 
     if set -q TERM; and test "$TERM" = "xterm-kitty"
         function kitty
