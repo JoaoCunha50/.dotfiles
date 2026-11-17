@@ -1,19 +1,16 @@
 return {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+    },
     ft = { "markdown" },
-
-    build = "cd app && npm install",
-
     keys = {
         {
             "<leader>mp",
             ft = "markdown",
-            "<cmd>MarkdownPreviewToggle<cr>",
+            "<cmd>RenderMarkdown toggle<cr>",
             desc = "Toggle Markdown Preview",
         },
     },
-    config = function()
-        vim.g.mkdp_theme = 'dark'
-    end,
+    opts = {},
 }
