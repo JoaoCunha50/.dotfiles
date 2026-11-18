@@ -2,7 +2,17 @@ vim.opt.autoread = true
 vim.opt.showmode = false
 vim.opt.cmdheight = 0
 
-vim.opt.fillchars = { eob = " " }
+-- Keep split boundaries blank, including the explorer/code separator.
+vim.opt.fillchars = {
+    eob = " ",
+    vert = " ",
+    horiz = " ",
+    vertleft = " ",
+    vertright = " ",
+    verthoriz = " ",
+    horizup = " ",
+    horizdown = " ",
+}
 
 vim.opt.nu = true
 vim.opt.relativenumber = false

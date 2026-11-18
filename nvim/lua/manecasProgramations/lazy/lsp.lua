@@ -152,9 +152,10 @@ return {
 				underline = true,
 				severity_sort = true,
 				float = {
-					focusable = false,
+					-- Repeat <leader>vd to focus; <C-w>p returns to the code.
+					focusable = true,
 					style = "minimal",
-					border = "rounded",
+					border = "none",
 					max_width = 80,
 					max_height = 16,
 					source = "if_many",
@@ -178,7 +179,7 @@ return {
 			completion = {
 				menu = {
 					min_width = 40,
-					border = "rounded",
+					border = "none",
 					draw = {
 						padding = { 2, 2 },
 						gap = 2,
@@ -195,7 +196,7 @@ return {
 				documentation = {
 					auto_show = true,
 					auto_show_delay_ms = 250,
-					window = { border = "rounded" },
+					window = { border = "none" },
 				},
 			},
 			sources = {
@@ -206,7 +207,7 @@ return {
 			},
 			signature = {
 				enabled = true,
-				window = { border = "rounded" },
+				window = { border = "none" },
 			},
 		},
 	},

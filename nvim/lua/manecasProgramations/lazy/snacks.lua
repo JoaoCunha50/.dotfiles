@@ -3,6 +3,8 @@ return {
 	priority = 1000,
 	lazy = false,
 	opts = {
+		-- Inherit blank split separators instead of Snacks' local fillchars.
+		win = { wo = { fillchars = vim.o.fillchars } },
 		bigfile = { enabled = true },
 		input = { enabled = true },
 		lazygit = { enabled = true },
