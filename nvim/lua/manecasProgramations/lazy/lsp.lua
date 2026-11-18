@@ -18,6 +18,45 @@ return {
 			require("fidget").setup({})
 			require("mason").setup()
 
+			local apply_workspace_edit = vim.lsp.util.apply_workspace_edit
+			vim.lsp.util.apply_workspace_edit = function(edit, encoding)
+				-- Persist import updates/refactors, but never save pre-existing user edits.
+				local modified = {}
+				local function remember(uri)
+					if uri:sub(1, 7) == "file://" then
+						local buf = vim.uri_to_bufnr(uri)
+						modified[buf] = vim.bo[buf].modified
+					end
+				end
+				for uri in pairs(edit.changes or {}) do
+					remember(uri)
+				end
+				for _, change in ipairs(edit.documentChanges or {}) do
+					if change.textDocument then
+						remember(change.textDocument.uri)
+					end
+				end
+
+				apply_workspace_edit(edit, encoding)
+
+				for buf, was_modified in pairs(modified) do
+					if
+						not was_modified
+						and vim.api.nvim_buf_is_valid(buf)
+						and vim.bo[buf].modified
+						and vim.bo[buf].buftype == ""
+						and vim.api.nvim_buf_get_name(buf) ~= ""
+					then
+						local ok, err = pcall(vim.api.nvim_buf_call, buf, function()
+							vim.cmd("silent update")
+						end)
+						if not ok then
+							vim.notify("Could not save LSP edits: " .. tostring(err), vim.log.levels.ERROR)
+						end
+					end
+				end
+			end
+
 			vim.lsp.config("vtsls", {
 				settings = {
 					vtsls = {
@@ -43,14 +82,9 @@ return {
 					"vtsls",
 					"tailwindcss",
 					"eslint",
+                    "qmlls"
 				},
-				-- Uncomment to keep stylua as formatter only (conform runs it):
-				-- automatic_enable = { exclude = { "stylua" } },
 			})
-
-			-- Not from Mason: its qmlls binary is built against a different Qt and misses
-			-- libs on NixOS.
-			vim.lsp.enable("qmlls")
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("lsp-attach-opts", { clear = true }),
@@ -102,7 +136,10 @@ return {
 				end,
 			})
 			vim.diagnostic.config({
-				virtual_text = true,
+				virtual_text = {
+					spacing = 4,
+					prefix = "●",
+				},
 				signs = {
 					text = {
 						[vim.diagnostic.severity.ERROR] = "󰅚",
@@ -118,7 +155,9 @@ return {
 					focusable = false,
 					style = "minimal",
 					border = "rounded",
-					source = true,
+					max_width = 80,
+					max_height = 16,
+					source = "if_many",
 					header = "",
 					prefix = "",
 				},
@@ -135,13 +174,40 @@ return {
 				["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
 			},
 			appearance = { nerd_font_variant = "mono" },
+			-- Give suggestions room without changing providers or completion keys.
+			completion = {
+				menu = {
+					min_width = 40,
+					border = "rounded",
+					draw = {
+						padding = { 2, 2 },
+						gap = 2,
+						columns = {
+							{ "kind_icon" },
+							{ "label", "label_description", gap = 1 },
+							{ "source_name" },
+						},
+						components = {
+							label = { width = { min = 28, max = 48, fill = true } },
+						},
+					},
+				},
+				documentation = {
+					auto_show = true,
+					auto_show_delay_ms = 250,
+					window = { border = "rounded" },
+				},
+			},
 			sources = {
 				default = { "lsp", "path", "snippets", "lazydev" },
 				providers = {
 					lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
 				},
 			},
-			signature = { enabled = true },
+			signature = {
+				enabled = true,
+				window = { border = "rounded" },
+			},
 		},
 	},
 }

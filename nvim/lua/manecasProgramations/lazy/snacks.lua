@@ -23,6 +23,8 @@ return {
 					ignored = true, -- show gitignored files
 					exclude = { "node_modules", ".git" },
 					jump = { close = true }, -- close after opening a file
+					-- Separate icons from names while keeping the sidebar at 30 columns.
+					formatters = { file = { icon_width = 2 } },
 					layout = { layout = { width = 30, min_width = 30 } },
 				},
 			},
@@ -33,14 +35,12 @@ return {
 			group = vim.api.nvim_create_augroup("snacks-explorer-last-window", { clear = true }),
 			callback = function()
 				local wins = vim.api.nvim_tabpage_list_wins(0)
-				-- the sidebar is a split (snacks_layout_box) holding floats (snacks_picker_*)
 				local snacks_wins = vim.tbl_filter(function(win)
 					return vim.bo[vim.api.nvim_win_get_buf(win)].filetype:match("^snacks_") ~= nil
 				end, wins)
 				local editor_wins = vim.tbl_filter(function(win)
 					return vim.api.nvim_win_get_config(win).relative == "" and not vim.list_contains(snacks_wins, win)
 				end, wins)
-				-- picker:close() reshuffles focus and cancels the :q, so close the windows directly
 				if #editor_wins == 1 and #snacks_wins > 0 then
 					for _, win in ipairs(snacks_wins) do
 						pcall(vim.api.nvim_win_close, win, true)
