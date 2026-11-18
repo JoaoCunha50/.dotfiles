@@ -1,3 +1,4 @@
+vim.opt.autoread = true
 vim.opt.showmode = false
 vim.opt.cmdheight = 0
 

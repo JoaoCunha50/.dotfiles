@@ -18,8 +18,32 @@ return {
 			require("fidget").setup({})
 			require("mason").setup()
 
+			vim.lsp.config("vtsls", {
+				settings = {
+					vtsls = {
+						autoUseWorkspaceTsdk = true,
+					},
+					typescript = {
+						tsdk = "node_modules/typescript/lib",
+					},
+				},
+			})
+
+			vim.lsp.config("eslint", {
+				settings = {
+					format = false,
+				},
+			})
+
 			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "vtsls", "tailwindcss" },
+				ensure_installed = {
+					"lua_ls",
+					"rust_analyzer",
+					"gopls",
+					"vtsls",
+					"tailwindcss",
+					"eslint",
+				},
 				-- Uncomment to keep stylua as formatter only (conform runs it):
 				-- automatic_enable = { exclude = { "stylua" } },
 			})
