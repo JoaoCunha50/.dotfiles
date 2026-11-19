@@ -19,14 +19,13 @@ return {
                     floats = "dark",
                 },
             })
-
             -- ChangeTheme("tokyonight-night")
         end,
     },
     {
         "rose-pine/neovim",
         name = "rose-pine",
-        lazy = false,
+        lazy = true,
         priority = 1000,
         config = function()
             require("rose-pine").setup({
@@ -40,8 +39,54 @@ return {
                     transparency = false,
                 },
             })
+            -- ChangeTheme("rose-pine")
+        end,
+    },
+    {
+        "vague2k/vague.nvim",
+        lazy = false,
+        priority = 1000,
+        config = function()
+            require("vague").setup({
+                transparent = false,
+                style = {
+                    comments = "italic",
+                    keywords = "none",
+                    functions = "none",
+                    strings = "none",
+                    variables = "none",
+                },
+            })
+            -- ChangeTheme("vague")
+        end,
+    },
+    {
+        "catppuccin/nvim",
+        name = "catppuccin",
+        lazy = false,
+        priority = 1000,
+        config = function()
+            require("catppuccin").setup({
+                flavour = "mocha",
+                transparent_background = false,
+                term_colors = true,
+                no_italic = false,
+                no_bold = false,
+                styles = {
+                    comments = { "italic" },
+                    keywords = { "italic" },
+                    functions = {},
+                    variables = {},
+                    booleans = { "bold", "italic" },
+                },
+                integrations = {
+                    cmp = true,
+                    gitsigns = true,
+                    treesitter = true,
+                },
+            })
 
-            ChangeTheme("rose-pine")
+            ChangeTheme("catppuccin")
         end,
     },
 }
