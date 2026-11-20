@@ -24,7 +24,17 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 -- Substituir a palavra onde estás (Search and Replace rápido)
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "tmux sessionizer" })
+vim.keymap.set("n", "<C-f>", function()
+	if vim.fn.executable("rex") == 1 then
+		local cmd = { "rex", "do", "sessionizer" }
+		if vim.env.REX_SESSION and vim.env.REX_SESSION ~= "" then
+			cmd = { "rex", "do", "-s", vim.env.REX_SESSION, "sessionizer" }
+		end
+		vim.fn.jobstart(cmd, { detach = true })
+	else
+		vim.fn.jobstart({ "tmux", "neww", "tmux-sessionizer" }, { detach = true })
+	end
+end, { desc = "sessionizer" })
 
 -- Tornar o ficheiro executável (chmod +x)
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })

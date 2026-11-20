@@ -1,3 +1,9 @@
+set -gx BUN_INSTALL "$HOME/.bun"
+set -gx ANDROID_HOME "$HOME/Library/Android/sdk"
+set -gx ANDROID_SDK_ROOT "$ANDROID_HOME"
+
+fish_add_path ~/.local/scripts ~/.local/bin $BUN_INSTALL/bin $HOME/.opencode/bin
+
 if status is-interactive
     function starship_transient_prompt_func
         starship module character
@@ -56,26 +62,4 @@ if status is-interactive
     alias celar "printf '\033[2J\033[3J\033[1;1H'"
     alias claer "printf '\033[2J\033[3J\033[1;1H'"
     alias pamcan pacman
-
-    fish_add_path $HOME/.opencode/bin
-    fish_add_path $HOME/.local/bin
-    fish_add_path $HOME/.local/scripts
-
-    if set -q TERM; and test "$TERM" = "xterm-kitty"
-        function kitty
-            kitty @ launch --type=tab --cwd ~/ --tab-title "home"
-        end
-
-        function dev
-            kitty @ launch --type=tab --cwd ~/dev --tab-title "dev"
-        end
-
-        function configs
-            kitty @ launch --type=tab --cwd ~/.config --tab-title "configs"
-        end
-
-        function study
-            kitty @ launch --type=tab --cwd ~/studys --tab-title "study"
-        end
-    end
 end

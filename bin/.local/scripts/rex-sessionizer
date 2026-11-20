@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Bash 3.2. Same folders as tmux-sessionizer. Session label is the final
+# folder, with "." and "-" turned into spaces.
+
+set -eu
+
+client_id=""
+keep_open=0
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	--client)
+		client_id="${2:-}"
+		shift 2
+		;;
+	*)
+		printf 'unknown argument: %s\n' "$1" >&2
+		exit 2
+		;;
+	esac
+done
+
+close_float() {
+	[[ -n "${REX_SESSION:-}" && -n "${REX_BLOCK:-}" ]] || return 0
+	local layer
+	layer=$(rex session inspect "$REX_SESSION" --json | jq -r --arg b "$REX_BLOCK" '
+		[ .windows[]?.layers[]?
+		  | select(.kind == "floating")
+		  | select(any(.blocks[]?; .block_id == $b))
+		  | .layer_id ] | first // empty
+	' || true)
+	[[ -n "${layer:-}" ]] || return 0
+	rex api call -s "$REX_SESSION" session.close_layer \
+		"$(jq -n --arg id "$layer" '{layer_id:$id}')" >/dev/null || true
+}
+
+cleanup() {
+	if [[ "$keep_open" -eq 0 ]]; then
+		close_float
+	fi
+}
+trap cleanup EXIT
+
+list_dirs() {
+	{
+		[[ -d "$HOME/.ssh" ]] && find "$HOME/.ssh" -mindepth 1 -maxdepth 1 -type d
+		[[ -d "$HOME/dev/personal" ]] && find "$HOME/dev/personal" -mindepth 1 -maxdepth 1 -type d
+		[[ -d "$HOME/dev/projects" ]] && find "$HOME/dev/projects" -mindepth 2 -maxdepth 2 -type d
+	} 2>/dev/null || true
+}
+
+rows() {
+	local dirs_json
+	dirs_json=$(list_dirs | sort -u | jq -Rsc 'split("\n") | map(select(length > 0))')
+	rex ls --json | jq -r --arg cur "${REX_SESSION:-}" --argjson dirs "$dirs_json" '
+		def norm: gsub("[.-]"; " ") | gsub(" +"; " ") | gsub("^ +| +$"; "");
+		[.sessions[]? | {
+			id: .session_id,
+			label: (.label // ""),
+			key: ((.label // "") | norm),
+			current: (.session_id == $cur)
+		}] as $sessions
+		| [$sessions[].key | select(length > 0)] as $taken
+		| (
+			[$sessions[] | select(.current)]
+			+ ([$sessions[] | select(.current | not)] | sort_by(.label | ascii_downcase))
+			| .[]
+			| ["session", .id, (if .label == "" then .id else .label end)]
+		),
+		(
+			[$dirs[]
+			 | . as $path
+			 | ($path | split("/") | last) as $base
+			 | ($base | norm) as $key
+			 | select(($taken | index($key)) | not)
+			 | ["dir", $path, (if $key == "" then $base else $key end), $path]]
+			| sort_by(.[2] | ascii_downcase)
+			| .[]
+		)
+		| @tsv
+	'
+}
+
+select_session() {
+	local sid="$1"
+	if [[ -z "$client_id" ]]; then
+		printf 'missing --client\n' >&2
+		keep_open=1
+		exit 1
+	fi
+	if ! rex -C "$client_id" do session.select "session_id=${sid}"; then
+		keep_open=1
+		exit 1
+	fi
+}
+
+label_for() {
+	local base
+	base=$(basename "$1")
+	printf '%s' "$base" | jq -Rr 'gsub("[.-]"; " ") | gsub(" +"; " ") | gsub("^ +| +$"; "")'
+}
+
+open_dir() {
+	local path="$1" label sid created
+	label=$(label_for "$path")
+	if [[ -z "$label" ]]; then
+		label=$(basename "$path")
+	fi
+	sid=$(rex ls --json | jq -r --arg want "$label" '
+		def norm: gsub("[.-]"; " ") | gsub(" +"; " ") | gsub("^ +| +$"; "");
+		[.sessions[]? | select(((.label // "") | norm) == $want) | .session_id] | first // empty
+	')
+	if [[ -z "$sid" ]]; then
+		if ! created=$(rex new "$label" -c "$path" --json); then
+			keep_open=1
+			exit 1
+		fi
+		sid=$(printf '%s' "$created" | jq -er '.session_id')
+	fi
+	select_session "$sid"
+}
+
+choice=""
+status=0
+set +e
+choice=$(rows | fzf \
+	--delimiter=$'\t' \
+	--with-nth=3,4 \
+	--reverse \
+	--prompt='session> ' \
+	--header='session or folder')
+status=$?
+set -e
+[[ "$status" -eq 0 && -n "$choice" ]] || exit 0
+
+kind=${choice%%$'\t'*}
+rest=${choice#*$'\t'}
+target=${rest%%$'\t'*}
+
+case "$kind" in
+session)
+	[[ "$target" == "${REX_SESSION:-}" ]] && exit 0
+	select_session "$target"
+	;;
+dir)
+	open_dir "$target"
+	;;
+*)
+	printf 'bad choice: %s\n' "$kind" >&2
+	keep_open=1
+	exit 1
+	;;
+esac
