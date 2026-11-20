@@ -43,6 +43,41 @@ local function sessionizer_layer(view)
 	return nil
 end
 
+-- Keys give the app as ctx.client_id. rex do from nvim gives the CLI.
+local function app_client(session_id, preferred)
+	local listed = rex.call("client.list")
+	if type(listed) ~= "table" then
+		return preferred
+	end
+	local apps = {}
+	for _, client in ipairs(listed.clients or {}) do
+		local info = client.info or {}
+		local state = client.connection_state or "connected"
+		if info.kind == "app" and state == "connected" and client.client_id ~= nil then
+			apps[#apps + 1] = client
+		end
+	end
+	if preferred ~= nil and preferred ~= "" then
+		for _, client in ipairs(apps) do
+			if client.client_id == preferred then
+				return preferred
+			end
+		end
+	end
+	local fallback = nil
+	for _, client in ipairs(apps) do
+		if fallback == nil then
+			fallback = client.client_id
+		end
+		for _, sid in ipairs(client.session_ids or {}) do
+			if sid == session_id then
+				return client.client_id
+			end
+		end
+	end
+	return fallback or preferred
+end
+
 rex.action({
 	name = "sessionizer",
 	title = "Sessionizer",
@@ -63,9 +98,10 @@ rex.action({
 		end
 
 		local command = { "rex-sessionizer" }
-		if ctx.client_id ~= nil and ctx.client_id ~= "" then
+		local client_id = app_client(ctx.session_id, ctx.client_id)
+		if client_id ~= nil and client_id ~= "" then
 			command[#command + 1] = "--client"
-			command[#command + 1] = ctx.client_id
+			command[#command + 1] = client_id
 		end
 
 		local created, err = rex.session.new_layer({
@@ -82,6 +118,7 @@ rex.action({
 		if err ~= nil then
 			error(err, 0)
 		end
+
 		local block_id = created and created.block_ids and created.block_ids[1]
 		if block_id ~= nil then
 			rex.session.set_block_label({ block_id = block_id, label = "sessionizer" })

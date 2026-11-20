@@ -25,15 +25,16 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 vim.keymap.set("n", "<C-f>", function()
-	if vim.fn.executable("rex") == 1 then
-		local cmd = { "rex", "do", "sessionizer" }
-		if vim.env.REX_SESSION and vim.env.REX_SESSION ~= "" then
-			cmd = { "rex", "do", "-s", vim.env.REX_SESSION, "sessionizer" }
-		end
-		vim.fn.jobstart(cmd, { detach = true })
-	else
-		vim.fn.jobstart({ "tmux", "neww", "tmux-sessionizer" }, { detach = true })
+	local session = vim.env.REX_SESSION
+	if session and session ~= "" and vim.fn.executable("rex") == 1 then
+		vim.fn.jobstart({ "rex", "do", "-s", session, "sessionizer" }, { detach = true })
+		return
 	end
+	if vim.fn.executable("tmux") == 1 then
+		vim.fn.jobstart({ "tmux", "neww", "tmux-sessionizer" }, { detach = true })
+		return
+	end
+	vim.notify("sessionizer: no Rex session and no tmux", vim.log.levels.ERROR)
 end, { desc = "sessionizer" })
 
 -- Tornar o ficheiro executável (chmod +x)

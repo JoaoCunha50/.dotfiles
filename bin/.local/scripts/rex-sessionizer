@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Bash 3.2. Same folders as tmux-sessionizer. Session label is the final
-# folder, with "." and "-" turned into spaces.
 
 set -eu
 
