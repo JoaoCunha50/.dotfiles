@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -u -o pipefail
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+roots_file=$script_dir/session-roots
+[[ -r $roots_file ]] || exit 0
+
+while IFS=$'\t' read -r root depth extra; do
+    [[ -z ${root:-} || $root == \#* ]] && continue
+    [[ ${depth:-} =~ ^[0-9]+$ ]] || continue
+    [[ -z ${extra:-} ]] || continue
+
+    case $root in
+        '~') root=$HOME ;;
+        '~/'*) root=$HOME/${root#'~/'} ;;
+    esac
+    [[ -d $root ]] || continue
+
+    find "$root" -mindepth "$depth" -maxdepth "$depth" -type d 2>/dev/null
+done <"$roots_file"

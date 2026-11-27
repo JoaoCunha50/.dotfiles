@@ -15,6 +15,7 @@ return {
                 json = { "prettier" },
                 html = { "prettier" },
                 css = { "prettier" },
+                rust = { "rustfmt" }
             },
             formatters = {
                 ["clang-format"] = {
