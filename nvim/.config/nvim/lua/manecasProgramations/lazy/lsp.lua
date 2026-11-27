@@ -74,6 +74,11 @@ return {
 				},
 			})
 
+            vim.lsp.config("qmlls", {
+                cmd = { "qmlls6" },
+            })
+            vim.lsp.enable("qmlls")
+
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"lua_ls",
@@ -82,7 +87,6 @@ return {
 					"vtsls",
 					"tailwindcss",
 					"eslint",
-                    "qmlls"
 				},
 			})
 

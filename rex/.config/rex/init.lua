@@ -151,5 +151,5 @@ rex.action({
 	end,
 })
 
-rex.bind("cmd+shift+k", "sessionizer")
+rex.bind("cmd+k", "sessionizer")
 rex.bind("f1", "split_auto")

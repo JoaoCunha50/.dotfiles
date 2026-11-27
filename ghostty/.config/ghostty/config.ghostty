@@ -1,5 +1,4 @@
 # Shell
-command = /usr/bin/fish
 shell-integration = fish
 shell-integration-features = no-cursor
 confirm-close-surface = false
@@ -8,7 +7,6 @@ confirm-close-surface = false
 font-family = "JetBrainsMono Nerd Font Mono"
 font-style = bold
 font-size = 13
-
 font-codepoint-map = U+D000-U+D200=termicons
 
 # Window
@@ -27,7 +25,7 @@ cursor-style = block
 adjust-cursor-thickness = 85%
 cursor-style-blink = true
 
-custom-shader = /home/joaocunha50/.config/ghostty/shaders/cursor-warp.glsl
+custom-shader = ~/.config/ghostty/shaders/cursor-warp.glsl
 custom-shader-animation = always
 
 # Tabs
@@ -42,7 +40,11 @@ keybind = ctrl+6=goto_tab:6
 keybind = f1=new_split:right
 
 # Clipboard
-copy-on-select           = clipboard
-clipboard-read           = allow
-clipboard-write          = allow
-scrollback-limit         = 10000000
+copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
+scrollback-limit = 10000000
+
+# Generated palette and optional machine display overrides.
+config-file = ?yonux-colors
+config-file = ?local.ghostty

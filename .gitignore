@@ -1,2 +1,3 @@
 kitty/kitty-session.conf
 .dotfiles.env
+nvim/lazy.nvim/

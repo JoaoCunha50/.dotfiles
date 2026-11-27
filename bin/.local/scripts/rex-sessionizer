@@ -2,6 +2,8 @@
 
 set -eu
 
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+
 client_id=""
 keep_open=0
 
@@ -18,17 +20,23 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+current_session=""
+if [[ -n "${REX_BLOCK:-}" ]]; then
+	current_session=$(rex session inspect "$REX_BLOCK" --json 2>/dev/null |
+		jq -r '.session_id // empty' || true)
+fi
+
 close_float() {
-	[[ -n "${REX_SESSION:-}" && -n "${REX_BLOCK:-}" ]] || return 0
+	[[ -n "$current_session" && -n "${REX_BLOCK:-}" ]] || return 0
 	local layer
-	layer=$(rex session inspect "$REX_SESSION" --json | jq -r --arg b "$REX_BLOCK" '
+	layer=$(rex session inspect "$current_session" --json | jq -r --arg b "$REX_BLOCK" '
 		[ .windows[]?.layers[]?
 		  | select(.kind == "floating")
 		  | select(any(.blocks[]?; .block_id == $b))
 		  | .layer_id ] | first // empty
 	' || true)
 	[[ -n "${layer:-}" ]] || return 0
-	rex api call -s "$REX_SESSION" session.close_layer \
+	rex api call -s "$current_session" session.close_layer \
 		"$(jq -n --arg id "$layer" '{layer_id:$id}')" >/dev/null || true
 }
 
@@ -40,17 +48,13 @@ cleanup() {
 trap cleanup EXIT
 
 list_dirs() {
-	{
-		[[ -d "$HOME/.ssh" ]] && find "$HOME/.ssh" -mindepth 1 -maxdepth 1 -type d
-		[[ -d "$HOME/dev/personal" ]] && find "$HOME/dev/personal" -mindepth 1 -maxdepth 1 -type d
-		[[ -d "$HOME/dev/projects" ]] && find "$HOME/dev/projects" -mindepth 2 -maxdepth 2 -type d
-	} 2>/dev/null || true
+	"$script_dir/sessionizer-dirs"
 }
 
 rows() {
 	local dirs_json
 	dirs_json=$(list_dirs | sort -u | jq -Rsc 'split("\n") | map(select(length > 0))')
-	rex ls --json | jq -r --arg cur "${REX_SESSION:-}" --argjson dirs "$dirs_json" '
+	rex ls --json | jq -r --arg cur "$current_session" --argjson dirs "$dirs_json" '
 		def norm: gsub("[.-]"; " ") | gsub(" +"; " ") | gsub("^ +| +$"; "");
 		[.sessions[]? | {
 			id: .session_id,
@@ -137,7 +141,7 @@ target=${rest%%$'\t'*}
 
 case "$kind" in
 session)
-	[[ "$target" == "${REX_SESSION:-}" ]] && exit 0
+	[[ "$target" == "$current_session" ]] && exit 0
 	select_session "$target"
 	;;
 dir)
