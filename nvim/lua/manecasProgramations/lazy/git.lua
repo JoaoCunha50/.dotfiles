@@ -49,6 +49,14 @@ return {
 					lualine_b = { "branch", "diff", "diagnostics" },
 					lualine_c = { "filename" },
 					lualine_x = {
+						{
+							function()
+								return "recording @" .. vim.fn.reg_recording()
+							end,
+							cond = function()
+								return vim.fn.reg_recording() ~= ""
+							end,
+						},
 						"encoding",
 						"fileformat",
 						"filetype",
