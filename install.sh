@@ -30,13 +30,12 @@ STOW_PACKAGES=(fish ghostty tmux rex bin starship atuin nvim)
 PACMAN_PACKAGES=(
     stow fish fzf atuin tmux ghostty jq starship fnm direnv zoxide eza
     neovim tree-sitter-cli git ripgrep fd lazygit clang stylua prettier
-    ttf-jetbrains-mono-nerd
 )
 BREW_FORMULAE=(
     stow fish fzf atuin tmux jq starship fnm direnv zoxide eza neovim
     tree-sitter-cli git ripgrep fd lazygit clang-format stylua prettier
 )
-BREW_CASKS=(ghostty font-jetbrains-mono-nerd-font)
+BREW_CASKS=(ghostty)
 
 case $(uname -s) in
     Linux)
