@@ -9,6 +9,7 @@ set -g DOTFILES_PATHS \
     "$HOME/.local/scripts" \
     "$HOME/.local/bin" \
     "$HOME/.opencode/bin"
+
 fish_add_path --global --move $DOTFILES_PATHS
 
 if status is-interactive
