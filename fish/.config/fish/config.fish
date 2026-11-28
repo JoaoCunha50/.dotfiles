@@ -88,6 +88,9 @@ if status is-interactive
     abbr ll 'ls -l'
     abbr la 'ls -a'
     abbr lla 'ls -la'
+
+    abbr v 'nvim'
+    abbr e 'nvim'
     abbr edit 'nvim'
 
     alias clear "printf '\033[2J\033[3J\033[1;1H'"
