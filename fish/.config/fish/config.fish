@@ -13,6 +13,9 @@ set -g DOTFILES_PATHS \
 fish_add_path --global --move $DOTFILES_PATHS
 
 if status is-interactive
+    set -g fish_greeting
+    fastfetch
+
     function starship_transient_prompt_func
         starship module character
     end
